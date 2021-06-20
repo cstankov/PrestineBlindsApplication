@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group>
+        <item
+            android:id="@+id/Download"
+            android:title="Download to CSV File"
+            android:icon="@drawable/submit"
+            />
+
+        <item
+            android:id="@+id/clear"
+            android:title="Clear"
+            android:icon="@drawable/trash"
+            />
+
+        <item
+            android:id="@+id/calculate"
+            android:title="Calculate Cost"
+            android:icon="@drawable/calculate"
+            />
+    </group>
+</menu>
