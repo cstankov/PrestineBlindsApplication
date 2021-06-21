@@ -7,11 +7,11 @@ import android.widget.RadioButton;
 import java.util.ArrayList;
 
 public class CostCalculator {
-    private ArrayList<InputHandler> inputHandlerList;
+    private ArrayList<Blind> blindList;
     private BlindInformationGatherer blindInformationGatherer;
-    private ArrayList<InputHandler> faux_blinds = new ArrayList<>();
-    private ArrayList<InputHandler> zebra_blinds = new ArrayList<>();
-    private ArrayList<InputHandler> roller_blinds = new ArrayList<>();
+    private ArrayList<Blind> faux_blinds = new ArrayList<>();
+    private ArrayList<Blind> zebra_blinds = new ArrayList<>();
+    private ArrayList<Blind> roller_blinds = new ArrayList<>();
 
     private Integer zebraSquareFootageTotal = 0;
     private Integer rollerSquareFootageTotal = 0;
@@ -26,6 +26,7 @@ public class CostCalculator {
     private Double zebraCostMultiplier = 1.0;
     private Double rollerCostMultiplier = 1.0;
     private Double motorCost = 1.0;
+    private Double deposit = 0.0;
 
     private boolean allFauxSelected = false;
     private boolean allRollerSelected = false;
@@ -69,8 +70,8 @@ public class CostCalculator {
             {120,	107,	133,	156,	178,	204,	227,	253,    -1,     -1,     -1,     -1,     -1,     -1}
     };
 
-    public CostCalculator(ArrayList<InputHandler> inputHandlerList, BlindInformationGatherer blindInformationGatherer){
-        this.inputHandlerList = inputHandlerList;
+    public CostCalculator(ArrayList<Blind> blindList, BlindInformationGatherer blindInformationGatherer){
+        this.blindList = blindList;
         this.blindInformationGatherer = blindInformationGatherer;
     }
 
@@ -81,10 +82,11 @@ public class CostCalculator {
         rollerSquareFootageTotal = 0;
         zebraSquareFootageTotal = 0;
         totalCost = 0.0;
-        getFauxCostMultiplier();
-        getZebraCostMultiplier();
-        getRollerCostMultiplier();
-        getMotorCost();
+        parseFauxCostMultiplier();
+        parseZebraCostMultiplier();
+        parseRollerCostMultiplier();
+        parseMotorCost();
+        parseDeposit();
         findRowsToCalculate();
 
         StringBuilder cost = new StringBuilder();
@@ -99,7 +101,16 @@ public class CostCalculator {
         return cost.toString();
     }
 
-    private void getFauxCostMultiplier(){
+    private void parseDeposit(){
+        EditText deposit = blindInformationGatherer.findViewById(R.id.Deposit);
+        String depositString = deposit.getText().toString().trim();
+        try{
+            this.deposit = Double.parseDouble(depositString);
+        }catch (NumberFormatException ignored){
+        }
+    }
+
+    private void parseFauxCostMultiplier(){
         EditText costMultiplier = blindInformationGatherer.findViewById(R.id.fauxMultiplier);
         String costMultiplierString = costMultiplier.getText().toString().trim();
         try{
@@ -108,7 +119,7 @@ public class CostCalculator {
         }
     }
 
-    private void getZebraCostMultiplier(){
+    private void parseZebraCostMultiplier(){
         EditText costMultiplier = blindInformationGatherer.findViewById(R.id.zebraMultiplier);
         String costMultiplierString = costMultiplier.getText().toString().trim();
         try{
@@ -117,7 +128,7 @@ public class CostCalculator {
         }
     }
 
-    private void getRollerCostMultiplier(){
+    private void parseRollerCostMultiplier(){
         EditText costMultiplier = blindInformationGatherer.findViewById(R.id.rollerMultiplier);
         String costMultiplierString = costMultiplier.getText().toString().trim();
         try{
@@ -126,7 +137,7 @@ public class CostCalculator {
         }
     }
 
-    private void getMotorCost(){
+    private void parseMotorCost(){
         EditText costMultiplier = blindInformationGatherer.findViewById(R.id.motorCost);
         String costMultiplierString = costMultiplier.getText().toString().trim();
         try{
@@ -140,28 +151,28 @@ public class CostCalculator {
         RadioButton allZebra = blindInformationGatherer.findViewById(R.id.allZebra);
         RadioButton allRoller = blindInformationGatherer.findViewById(R.id.allRoller);
 
-        for (InputHandler inputHandler : inputHandlerList) {
-            CheckBox checkBox = blindInformationGatherer.findViewById(inputHandler.getCalculateId());
+        for (Blind blind : blindList) {
+            CheckBox checkBox = blindInformationGatherer.findViewById(blind.getCalculateId());
             if (checkBox.isChecked()) {
                 if (allFaux.isChecked()) {
-                    faux_blinds.add(inputHandler);
+                    faux_blinds.add(blind);
                     allFauxSelected = true;
                 } else if (allZebra.isChecked()) {
-                    zebra_blinds.add(inputHandler);
+                    zebra_blinds.add(blind);
                     allZebraSelected = true;
                 } else if (allRoller.isChecked()) {
-                    roller_blinds.add(inputHandler);
+                    roller_blinds.add(blind);
                     allRollerSelected = true;
                 }else{
-                    if (inputHandler.isRoller()) {
-                        roller_blinds.add(inputHandler);
-                    } else if (inputHandler.isZebra()) {
-                        zebra_blinds.add(inputHandler);
-                    } else if (inputHandler.isFaux()) {
-                        faux_blinds.add(inputHandler);
+                    if (blind.isRoller()) {
+                        roller_blinds.add(blind);
+                    } else if (blind.isZebra()) {
+                        zebra_blinds.add(blind);
+                    } else if (blind.isFaux()) {
+                        faux_blinds.add(blind);
                     }
                 }
-                if (inputHandler.isMotor()) {
+                if (blind.isMotor()) {
                     numberOfMotors++;
                 }
             }
@@ -171,8 +182,8 @@ public class CostCalculator {
     private void buildFauxCalculations(StringBuilder cost){
         if(!faux_blinds.isEmpty()) {
             cost.append("2\" Faux Blinds:\n");
-            for (InputHandler inputHandler : faux_blinds) {
-                buildDimensions(inputHandler, cost);
+            for (Blind blind : faux_blinds) {
+                buildDimensions(blind, cost);
             }
             cost.append("Total Faux Cost: $").append(totalFauxCost.toString()).append("\n\n");
         }
@@ -181,8 +192,8 @@ public class CostCalculator {
     private void buildZebraCalculations(StringBuilder cost){
         if(!zebra_blinds.isEmpty()) {
             cost.append("Zebra Blinds:\n");
-            for (InputHandler inputHandler : zebra_blinds) {
-                buildDimensions(inputHandler, cost);
+            for (Blind blind : zebra_blinds) {
+                buildDimensions(blind, cost);
             }
             cost.append("Total Square Footage: ").append(zebraSquareFootageTotal.toString()).append("\n");
 
@@ -195,8 +206,8 @@ public class CostCalculator {
     private void buildRollerCalculations(StringBuilder cost){
         if(!roller_blinds.isEmpty()) {
             cost.append("Roller Blinds:\n");
-            for (InputHandler inputHandler : roller_blinds) {
-                buildDimensions(inputHandler, cost);
+            for (Blind blind : roller_blinds) {
+                buildDimensions(blind, cost);
             }
             cost.append("Total Square Footage: ").append(rollerSquareFootageTotal.toString()).append("\n");
 
@@ -215,45 +226,54 @@ public class CostCalculator {
         }
     }
 
-    private void buildDimensions(InputHandler inputHandler, StringBuilder cost){
-        Integer count = inputHandler.getCount();
-        Integer width = inputHandler.getWidth();
-        Integer height = inputHandler.getHeight();
-        Double widthRemainder = inputHandler.getRoundedWidthRemainder();
-        Double heightRemainder = inputHandler.getRoundedHeightRemainder();
+    private void buildDimensions(Blind blind, StringBuilder cost){
+        Integer count = blind.getCount();
+        Integer width = blind.getWidth();
+        Integer height = blind.getHeight();
+        Double widthRemainder = blind.getRoundedWidthRemainder();
+        Double heightRemainder = blind.getRoundedHeightRemainder();
         cost.append(" ").append(count.toString()).append(". ").append(width.toString());
         if(widthRemainder != 0){
-            cost.append("-").append(inputHandler.getRoundedWidthRemainderString());
+            cost.append("-").append(blind.getRoundedWidthRemainderString());
         }
         cost.append("\" x ").append(height.toString());
         if(heightRemainder != 0){
-            cost.append("-").append(inputHandler.getRoundedHeightRemainderString());
+            cost.append("-").append(blind.getRoundedHeightRemainderString());
         }
-        cost.append("\"  ~  $").append(calculateCost(inputHandler)).append("\n");
+        cost.append("\"  ~  $").append(calculateCost(blind)).append("\n");
     }
 
-    private String calculateCost(InputHandler inputHandler){
-        Integer width = inputHandler.getWidth();
-        Double widthRemainder = inputHandler.getRoundedWidthRemainder();
-        Integer height = inputHandler.getHeight();
-        Double heightRemainder = inputHandler.getRoundedHeightRemainder();
+    private String calculateCost(Blind blind){
+        Integer width = blind.getWidth();
+        Double widthRemainder = blind.getRoundedWidthRemainder();
+        Integer height = blind.getHeight();
+        Double heightRemainder = blind.getRoundedHeightRemainder();
         Integer actualWidth = (int) Math.ceil(width + widthRemainder);
         Integer actualHeight = (int) Math.ceil(height + heightRemainder);
         Double individualCost = 0.0;
 
-        if(inputHandler.isFaux() || allFauxSelected){
+        if(blind.isFaux() || allFauxSelected){
             individualCost = (double) calculateFaux(actualWidth, actualHeight);
             individualCost = fauxCostMultiplier * individualCost;
-        }else if(inputHandler.isRoller() || allRollerSelected){
+        }else if(blind.isRoller() || allRollerSelected){
             individualCost = (double) calculateZebraAndRoller(actualWidth, actualHeight, false);
             individualCost = rollerCostMultiplier * individualCost;
-        }else if(inputHandler.isZebra() || allZebraSelected){
+        }else if(blind.isZebra() || allZebraSelected){
             individualCost = (double) calculateZebraAndRoller(actualWidth, actualHeight, true);
             individualCost = zebraCostMultiplier * individualCost;
         }
 
         individualCost = Math.round(individualCost * 100.0)/100.0;
+        setBlindCostAndSqFootage(blind, individualCost, (double) Math.round(width + widthRemainder * height + heightRemainder));
         return individualCost.toString();
+    }
+    private void setBlindCostAndSqFootage(Blind blind, Double individualCost, Double SquareFootage){
+        if(blind.isMotor()){
+            blind.setCost(individualCost + motorCost);
+        }else{
+            blind.setCost(individualCost);
+        }
+        blind.setSquareFootage(SquareFootage);
     }
 
     private Integer calculateFaux(Integer actualWidth, Integer actualHeight){
@@ -294,5 +314,57 @@ public class CostCalculator {
 
         }
         return roller_square_footage[row][col];
+    }
+
+    public Integer getZebraSquareFootageTotal() {
+        return zebraSquareFootageTotal;
+    }
+
+    public Integer getRollerSquareFootageTotal() {
+        return rollerSquareFootageTotal;
+    }
+
+    public Double getTotalFauxCost() {
+        return totalFauxCost;
+    }
+
+    public Double getTotalZebraCost() {
+        return totalZebraCost;
+    }
+
+    public Double getTotalRollerCost() {
+        return totalRollerCost;
+    }
+
+    public Double getTotalMotorCost() {
+        return totalMotorCost;
+    }
+
+    public Double getTotalCost() {
+        return totalCost;
+    }
+
+    public Integer getNumberOfMotors() {
+        return numberOfMotors;
+    }
+
+    public Double getFauxCostMultiplier() {
+        return fauxCostMultiplier;
+    }
+
+    public Double getZebraCostMultiplier() {
+        return zebraCostMultiplier;
+    }
+
+    public Double getRollerCostMultiplier() {
+        return rollerCostMultiplier;
+    }
+
+    public Double getMotorCost() {
+        return motorCost;
+    }
+
+    public Double getDeposit() {
+        return deposit;
     }
 }

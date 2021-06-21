@@ -34,7 +34,7 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
     private NavigationView navigationView;
     private Toolbar toolbar;
     private ActionBarDrawerToggle menuActionBarDrawerToggle;
-    private ArrayList<InputHandler> inputHandlerList;
+    private ArrayList<Blind> blindList;
     private CostCalculator costCalculator;
     private CSVWriter csvWriter;
 
@@ -44,8 +44,9 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_measurement_converter);
         this.table = findViewById(R.id.table_layout);
-        inputHandlerList = new ArrayList<>();
-        costCalculator = new CostCalculator(inputHandlerList, this);
+        this.blindList = new ArrayList<>();
+        this.costCalculator = new CostCalculator(blindList, this);
+        this.csvWriter = new CSVWriter(blindList,this,costCalculator);
         setDrawer();
         addRowButton();
         addFiveRows();
@@ -98,35 +99,35 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
     private void createRow(){
         TableRow tableRow = new TableRow(this);
         tableRow.setBackgroundResource(R.drawable.tablelines);
-        InputHandler inputHandler = new InputHandler(BlindInformationGatherer.this);
-        tableRow.addView(addRowToCalculation(inputHandler));
-        tableRow.addView(addNumber(inputHandler));
-        tableRow.addView(addWidth(inputHandler));
-        tableRow.addView(addWidthRemainder(inputHandler));
-        tableRow.addView(addHeight(inputHandler));
-        tableRow.addView(addHeightRemainder(inputHandler));
-        tableRow.addView(addType(inputHandler));
-        tableRow.addView(addMotor(inputHandler));
-        tableRow.addView(addNotes(inputHandler));
-        tableRow.addView(addControl(inputHandler));
-        inputHandlerList.add(inputHandler);
+        Blind blind = new Blind(BlindInformationGatherer.this);
+        tableRow.addView(addRowToCalculation(blind));
+        tableRow.addView(addNumber(blind));
+        tableRow.addView(addWidth(blind));
+        tableRow.addView(addWidthRemainder(blind));
+        tableRow.addView(addHeight(blind));
+        tableRow.addView(addHeightRemainder(blind));
+        tableRow.addView(addType(blind));
+        tableRow.addView(addMotor(blind));
+        tableRow.addView(addNotes(blind));
+        tableRow.addView(addControl(blind));
+        blindList.add(blind);
         table.addView(tableRow);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private CheckBox addRowToCalculation(InputHandler inputHandler){
+    private CheckBox addRowToCalculation(Blind blind){
         CheckBox calculate = new CheckBox(this);
         int calculateId = View.generateViewId();
-        inputHandler.setCalculateId(calculateId);
+        blind.setCalculateId(calculateId);
         calculate.setId(calculateId);
         return calculate;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private TextView addNumber(InputHandler inputHandler){
+    private TextView addNumber(Blind blind){
         TextView count = new TextView(this);
         int numberId = View.generateViewId();
-        inputHandler.setCountId(numberId);
+        blind.setCountId(numberId);
         count.setTextSize(20);
         count.setGravity(Gravity.CENTER);
         String count_string = this.count.toString();
@@ -137,47 +138,47 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private EditText addWidth(InputHandler inputHandler){
+    private EditText addWidth(Blind blind){
         EditText width = new EditText(this);
         width.setHint("In");
         int widthId = View.generateViewId();
-        inputHandler.setWidthId(widthId);
+        blind.setWidthId(widthId);
         width.setId(widthId);
         return width;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private EditText addHeight(InputHandler inputHandler){
+    private EditText addHeight(Blind blind){
         EditText height = new EditText(this);
         height.setHint("In");
         int heightId = View.generateViewId();
-        inputHandler.setHeightId(heightId);
+        blind.setHeightId(heightId);
         height.setId(heightId);
         return height;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private EditText addWidthRemainder(InputHandler inputHandler){
+    private EditText addWidthRemainder(Blind blind){
         EditText widthRemainder = new EditText(this);
         widthRemainder.setHint("Ex. 1/4");
         int widthRemainderId = View.generateViewId();
-        inputHandler.setWidthRemainderId(widthRemainderId);
+        blind.setWidthRemainderId(widthRemainderId);
         widthRemainder.setId(widthRemainderId);
         return widthRemainder;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private EditText addHeightRemainder(InputHandler inputHandler){
+    private EditText addHeightRemainder(Blind blind){
         EditText heightRemainder = new EditText(this);
         heightRemainder.setHint("Ex. 1/4");
         int heightRemainderId = View.generateViewId();
-        inputHandler.setHeightRemainderId(heightRemainderId);
+        blind.setHeightRemainderId(heightRemainderId);
         heightRemainder.setId(heightRemainderId);
         return heightRemainder;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private RadioGroup addType(InputHandler inputHandler){
+    private RadioGroup addType(Blind blind){
         RadioGroup type = new RadioGroup(this);
         type.setPadding(60,0,10, 0);
         type.setOrientation(RadioGroup.HORIZONTAL);
@@ -188,9 +189,9 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
         int fauxId = View.generateViewId();
         int zebraId = View.generateViewId();
         int rollerId = View.generateViewId();
-        inputHandler.setFauxId(fauxId);
-        inputHandler.setZebraId(zebraId);
-        inputHandler.setRollerId(rollerId);
+        blind.setFauxId(fauxId);
+        blind.setZebraId(zebraId);
+        blind.setRollerId(rollerId);
         faux.setId(fauxId);
         zebra.setId(zebraId);
         roller.setId(rollerId);
@@ -206,27 +207,27 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private RadioButton addMotor(InputHandler inputHandler){
+    private RadioButton addMotor(Blind blind){
         RadioButton motor = new RadioButton(this);
         int motorId = View.generateViewId();
-        inputHandler.setMotorId(motorId);
+        blind.setMotorId(motorId);
         motor.setId(motorId);
         motor.setText(R.string.motor);
         return motor;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private EditText addNotes(InputHandler inputHandler){
+    private EditText addNotes(Blind blind){
         EditText notes = new EditText(this);
         notes.setHint("Information");
         int notesId = View.generateViewId();
-        inputHandler.setNotesId(notesId);
+        blind.setNotesId(notesId);
         notes.setId(notesId);
         return notes;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private RadioGroup addControl(InputHandler inputHandler){
+    private RadioGroup addControl(Blind blind){
         RadioGroup control = new RadioGroup(this);
         control.setPadding(30,0,30, 0);
         control.setOrientation(RadioGroup.HORIZONTAL);
@@ -234,8 +235,8 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
         RadioButton right = new RadioButton(this);
         int leftId = View.generateViewId();
         int rightId = View.generateViewId();
-        inputHandler.setLeftId(leftId);
-        inputHandler.setRightId(rightId);
+        blind.setLeftId(leftId);
+        blind.setRightId(rightId);
         left.setId(leftId);
         right.setId(rightId);
         left.setPadding(0,0,30, 0);
@@ -256,15 +257,21 @@ public class BlindInformationGatherer extends AppCompatActivity implements Navig
             TableLayout tableLayout = findViewById(R.id.table_layout);
             tableLayout.removeViews(1, Math.max(0, tableLayout.getChildCount()-1));
             count = 1;
-            inputHandlerList.clear();
+            blindList.clear();
             TextView squareFootage = findViewById(R.id.costCalculations);
             squareFootage.setText("");
             addFiveRows();
         }else if(id == R.id.Download){
-
+            for(Blind blind : blindList){
+                blind.parseInputData();
+            }
+            costCalculator.displayCostCalculations();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                csvWriter.writeToCSV();
+            }
         }else if(id == R.id.calculate){
-            for(InputHandler inputHandler : inputHandlerList){
-                inputHandler.parseInputData();
+            for(Blind blind : blindList){
+                blind.parseInputData();
             }
             String cost = costCalculator.displayCostCalculations();
             TextView squareFootage = findViewById(R.id.costCalculations);
