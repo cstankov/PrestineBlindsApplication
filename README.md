@@ -4,6 +4,10 @@ Blinds Cost calculator is an android application that created directly with stak
 The application allows for ease of use calcualting the cost of the installation of the blinds per job.
 The measurements are taken by the sales team and are automatically converted to to a format that is better for the production team. 
 
+## Usage
+
+Download the repository and export the file to an APK. Once the APK is downloaded it can be used on your android mobile device. 
+
 ## LICENSE:
 
 Pristine Blinds Cost Calculator is a Free Software: You can redistribute, study and modify at your will under the terms of the GNU General Public License as published by the Free Software Foundation, must be version 3 (or at your will, a later version).
